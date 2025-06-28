@@ -1,0 +1,273 @@
+‬<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>قسم صيانة الآليات</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri&display=swap');
+    body {
+      font-family: 'Amiri', serif;
+      font-size: 13px;
+      background-color: #e6f4e6;
+      color: #083d0c;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+    header {
+      text-align: center;
+      padding: 20px;
+      background-color: #2d6a4f;
+      color: white;
+    }
+    header h1 {
+      font-size: 20px;
+    }
+    header h2 {
+      font-size: 16px;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      flex-wrap: wrap;
+    }
+    .controls button {
+      padding: 10px 20px;
+      background-color: #40916c;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    #searchInput {
+      width: 25cm;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 13px;
+      text-align: center;
+    }
+    table {
+      width: 95%;
+      margin: 0 auto 30px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #95d5b2;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #74c69d;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      background-color: #2d6a4f;
+      color: white;
+    }
+    @media print {
+      th:last-child,
+      td:last-child {
+        display: none;
+      }
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border: 2px solid #40916c;
+      width: 500px;
+      border-radius: 8px;
+    }
+    .modal-content label {
+      display: block;
+      margin-top: 10px;
+    }
+    .modal-content input, .modal-content select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    .modal-content .modal-buttons {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>مديرية أمن محافظة الأحمدي</h1>
+  <h2>قسم صيانة الآليات</h2>
+</header>
+<section class="controls">
+  <button id="addBtn">إضافة</button>
+  <input type="text" id="searchInput" placeholder="ابحث في الجدول...">
+  <button onclick="window.print()">طباعة</button>
+</section>
+<table id="dataTable">
+  <thead>
+    <tr>
+      <th>رقم الدورية</th>
+      <th>النوع</th>
+      <th>الموديل</th>
+      <th>الإدارة / القيادة</th>
+      <th>القسم / المخفر</th>
+      <th>الحالة</th>
+      <th>تاريخ الاستلام</th>
+      <th>الإجراءات</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<footer>
+  <p>قسم صيانة الآليات</p>
+</footer>
+
+<!-- نافذة منبثقة -->
+<div id="dataModal" class="modal">
+  <div class="modal-content">
+    <h3>إضافة بيانات جديدة</h3>
+    <label>رقم الدورية:</label>
+    <input type="text" id="modalNumber" />
+    <label>النوع:</label>
+    <select id="modalType">
+      <option>دورية</option>
+      <option>خدمات</option>
+      <option>مدنية</option>
+      <option>أخرى</option>
+    </select>
+    <label>الموديل:</label>
+    <select id="modalModel">
+      <script>
+        for(let y = 2018; y <= 2027; y++) {
+          document.write(`<option>${y}</option>`);
+        }
+      </script>
+    </select>
+    <label>الإدارة / القيادة:</label>
+    <select id="modalAdmin">
+      <option>إدارة الخدمات المالية والادارية</option>
+      <option>إدارة العمليات والدوريات</option>
+      <option>مكتب المدير العام</option>
+      <option>قيادة الأحمدي</option>
+      <option>قيادة الزور</option>
+      <option>قيادة الصباحة</option>
+      <option>قيادة الفحيحيل</option>
+      <option>قيادة الوفرة</option>
+      <option>قيادة ميناء عبدالله</option>
+    </select>
+    <label>القسم / المخفر:</label>
+    <input type="text" id="modalDept" />
+    <label>الحالة:</label>
+    <select id="modalStatus">
+      <option>في الخدمة</option>
+      <option>الصيانة</option>
+      <option>سكراب</option>
+    </select>
+    <div class="modal-buttons">
+      <button onclick="saveModalData()">حفظ</button>
+      <button onclick="closeModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const addBtn = document.getElementById("addBtn");
+const modal = document.getElementById("dataModal");
+const tbody = document.querySelector("#dataTable tbody");
+const searchInput = document.getElementById("searchInput");
+
+function saveData() {
+  const data = [];
+  tbody.querySelectorAll("tr").forEach(row => {
+    const cells = row.querySelectorAll("td");
+    const record = Array.from(cells).slice(0, 7).map(td => td.textContent);
+    data.push(record);
+  });
+  localStorage.setItem("vehicleData", JSON.stringify(data));
+}
+
+function loadData() {
+  const data = JSON.parse(localStorage.getItem("vehicleData") || "[]");
+  data.forEach(record => {
+    const row = tbody.insertRow();
+    record.forEach(text => row.insertCell().textContent = text);
+    const actions = row.insertCell();
+    actions.innerHTML = `<button onclick="editRow(this)">تعديل</button> <button onclick="deleteRow(this)">حذف</button>`;
+  });
+}
+
+function deleteRow(btn) {
+  if (confirm("هل أنت متأكد من الحذف؟")) {
+    btn.closest("tr").remove();
+    saveData();
+  }
+}
+
+function editRow(btn) {
+  alert("قريبًا: التعديل من خلال النافذة المنبثقة.");
+}
+
+function openModal() {
+  modal.style.display = "block";
+}
+
+function closeModal() {
+  modal.style.display = "none";
+}
+
+function saveModalData() {
+  const num = document.getElementById("modalNumber").value;
+  const type = document.getElementById("modalType").value;
+  const model = document.getElementById("modalModel").value;
+  const admin = document.getElementById("modalAdmin").value;
+  const dept = document.getElementById("modalDept").value;
+  const status = document.getElementById("modalStatus").value;
+
+  if (!num || !dept) {
+    alert("يرجى تعبئة جميع الحقول المطلوبة.");
+    return;
+  }
+
+  const row = tbody.insertRow();
+  [num, type, model, admin, dept, status, new Date().toLocaleDateString('en-GB')].forEach(text => row.insertCell().textContent = text);
+  const actions = row.insertCell();
+  actions.innerHTML = `<button onclick="editRow(this)">تعديل</button> <button onclick="deleteRow(this)">حذف</button>`;
+  saveData();
+  closeModal();
+}
+
+addBtn.onclick = openModal;
+
+searchInput.oninput = function () {
+  const value = this.value.toLowerCase();
+  Array.from(tbody.rows).forEach(row => {
+    const show = Array.from(row.cells).some(cell => cell.textContent.toLowerCase().includes(value));
+    row.style.display = show ? "" : "none";
+  });
+};
+
+window.onclick = function(event) {
+  if (event.target == modal) {
+    closeModal();
+  }
+};
+
+window.onload = loadData;
+</script>
+</body>
+</html>
